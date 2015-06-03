@@ -1,0 +1,9 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="VotiFantacalcio:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/VotiFantacalcio_jar</output-path>
+    <root id="archive" name="VotiFantacalcio.jar">
+      <element id="module-output" name="VotiFantacalcio" />
+      <element id="extracted-dir" path="$USER_HOME$/Downloads/jtidy-r938.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>
