@@ -43,6 +43,9 @@ public class VotiReader {
             else
                 app+='.';
         }
+        if(a.equals("s.v."))
+            return 0;
+
         try {
             return new Float(app);
         }catch(Exception e){
@@ -97,7 +100,8 @@ public class VotiReader {
                     buffer.add(app);
                     app=new ArrayList<>();
                     }
-                app.add(a.getNodeValue());
+                if(a.getNodeValue().hashCode()!=160 && a.getNodeValue().hashCode()!=0)
+                    app.add(a.getNodeValue());
             }
             buffer.remove(0);
 
@@ -106,7 +110,7 @@ public class VotiReader {
             for(int i=0;i<buffer.size();i++){
                 g=new Giocatore();
                 g.setCognome(buffer.get(i).get(0));
-                g.setVoto(toFloat(buffer.get(i).get(buffer.get(i).size()-8)));
+                g.setVoto(toFloat(buffer.get(i).get(buffer.get(i).size()-5)));
                 giocatori.add(g);
             }
             System.out.println();
