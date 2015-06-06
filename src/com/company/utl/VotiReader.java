@@ -62,7 +62,7 @@ public class VotiReader {
         System.out.println("Carico tutti i giocatori...");
 
         try {
-            url = new URL(path);
+            url = new URL("http://www.pianetafantacalcio.it/Voti_Ufficiosi.asp");
             is = url.openStream();  // throws an IOException
             br = new BufferedReader(new InputStreamReader(is));
 
@@ -72,48 +72,35 @@ public class VotiReader {
             Document response = tidy.parseDOM(br,null);
             XPathFactory factory = XPathFactory.newInstance();
             XPath xPath=factory.newXPath();
-            String pattern = "//div[@id='Voti']//table[@class='voti-m']//tr[@class]//td[@class]//node()";
-
+            String pattern = "//h3//strong/node()";
 
             NodeList nodes = (NodeList)xPath.evaluate(pattern, response, XPathConstants.NODESET);
-            List<List<String>> buffer= new ArrayList<>();
-            /*for (int i = 3; i < nodes.getLength(); i++) {
-                Node a = nodes.item(i);
-                if(isString(a.getNodeValue()) && a.getNodeValue().hashCode()!=0 && a.getNodeValue().hashCode()!=160 && !a.getNodeValue().equals("s.v.")) {
-                    if(g!=null)
-                        giocatori.add(g);
-                    g=new Giocatore();
-                    if(buffer.size()>0) {
-                        g.setCognome(buffer.get(0));
-                        g.setVoto(toFloat(buffer.get(buffer.size()-8)));
-                        buffer.removeAll(buffer);
-                        System.out.println("-");
-                    }
-                }
-                buffer.add(a.getNodeValue());
-            }*/
-            int j=0;
-            List<String> app=new ArrayList<>();
-            for (int i = 3; i < nodes.getLength(); i++) {
-                Node a = nodes.item(i);
-                if(isString(a.getNodeValue()) && a.getNodeValue().hashCode()!=0 && a.getNodeValue().hashCode()!=160 && !a.getNodeValue().equals("s.v.")) {
-                    buffer.add(app);
-                    app=new ArrayList<>();
-                    }
-                if(a.getNodeValue().hashCode()!=160 && a.getNodeValue().hashCode()!=0)
-                    app.add(a.getNodeValue());
-            }
-            buffer.remove(0);
+            int numeroGiornata=toInt(nodes.item(0).getNodeValue()+" ");
+            System.out.println("Numero giornata = "+numeroGiornata);
 
-            //popolazione lista "giocatori"
-            Giocatore g=null;
-            for(int i=0;i<buffer.size();i++){
-                g=new Giocatore();
-                g.setCognome(buffer.get(i).get(0));
-                g.setVoto(toFloat(buffer.get(i).get(buffer.get(i).size()-5)));
-                giocatori.add(g);
-            }
-            System.out.println();
+            url = new URL("http://www.pianetafantacalcio.it/Voti_UfficiosiTuttiExcel.asp?giornataScelta="+numeroGiornata);
+            is = url.openStream();  // throws an IOException
+            br = new BufferedReader(new InputStreamReader(is));
+
+            tidy = new Tidy();
+            tidy.setQuiet(true);
+            tidy.setShowWarnings(false);
+            response = tidy.parseDOM(br,null);
+            factory = XPathFactory.newInstance();
+            xPath=factory.newXPath();
+
+            int i=5;
+            Giocatore g;
+            do{
+                pattern = "//table/tr["+i+"]//node()";
+                nodes = (NodeList)xPath.evaluate(pattern, response, XPathConstants.NODESET);
+                if(nodes.getLength()>0) {
+                    g = new Giocatore(nodes);
+                    giocatori.add(g);
+                }
+                i++;
+            }while(nodes.getLength()>0);
+
         } catch (MalformedURLException mue) {
             mue.printStackTrace();
         } catch (IOException ioe) {
@@ -125,6 +112,19 @@ public class VotiReader {
         System.out.println("Giocatori caricati con successo!!");
         return giocatori;
     }
+
+    private static int toInt(String a){
+        String ret="";
+
+        for(int i=0;i<a.length();i++){
+            if(a.charAt(i)!= 176 && a.charAt(i)!= 32) {
+                ret += a.charAt(i);
+            }
+        }
+
+        return new Integer(ret);
+    }
+
     private boolean isString(String a){
         String app="";
 
